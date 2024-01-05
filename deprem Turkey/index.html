@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Türkiyedeki Depremler Anlık</title>
+    <meta name="description" content="Türkiyedeki son depremleri öğrenebileceğiniz harika bir websitesi! | Emirhan Barlas">
+    <meta name="keywords" content="Deprem, Son depremler, Anlık deprem, debrem, deprem mi oldu, son deprem, earthquake">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body{
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header{
+            background-image: url('https://isovdinckok.meb.k12.tr/meb_iys_dosyalar/34/03/965232/resimler/2023_05/k_09101443_0.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: #001014;
+            padding: 1em;
+            text-align: center;
+        }
+        main{
+            padding: 1em;
+        }
+        #depremListesi{
+            list-style: none;
+            padding: 0;
+        }
+        .deprem{
+            border: 1px solid #ddd;
+            margin-bottom: 0.5em;
+            padding: 1em;
+            border-radius: 10px;
+        }
+        footer{
+            background-color: transparent;
+            color: black;
+            backdrop-filter: blur(5px);
+            text-align: center;
+            padding: 5px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        a{
+            text-decoration: none;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Türkiyedeki Depremler Anlık</h1>
+    </header>
+    <main>
+        <ul id="depremListesi"></ul>
+    </main>
+    <footer>
+        <p>&copy; 2023 Barlas İletişim için <a href="https://emirhanbarlas.com">Emirhan Barlas.</a></p>
+    </footer>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const apiUrl = 'https://deprem-api.vercel.app/?type=afad';
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            const depremListesi = document.getElementById('depremListesi');
+            if (data && Array.isArray(data.earthquakes)) {
+                const siraliDepremler = data.earthquakes.sort((a, b) => b.timestamp - a.timestamp);
+                siraliDepremler.forEach(deprem => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'deprem';
+                    const tarih = new Date(deprem.timestamp * 1000);
+                    listItem.innerHTML = `
+                        <strong><i class="fa-solid fa-up-right-and-down-left-from-center"></i> Büyüklük (ML):</strong> ${deprem.size.ml || '-'}<br>
+                        <strong><i class="fa-solid fa-ruler"></i> Derinlik (KM):</strong> ${deprem.depth || '-'}<br>
+                        <strong><i class="fa-solid fa-location-dot"></i> Konumu:</strong> ${deprem.location || '-'}<br>
+                        <strong><i class="fa-solid fa-calendar-days"></i> Zaman:</strong> ${zamanFarkiniHesapla(tarih)}
+                    `;
+                    depremListesi.appendChild(listItem);
+                });
+            } else {
+                console.error('API yanıtı beklenen yapıda değil.');
+            }
+        })
+        .catch(error => console.error('Deprem verileri alınamadı.', error));
+    function zamanFarkiniHesapla(tarih) {
+        const simdikiZaman = new Date();
+        const fark = Math.abs(simdikiZaman - tarih);
+        const saat = Math.floor(fark / 3600000);
+        const dakika = Math.floor((fark % 3600000) / 60000);
+        return `${saat} saat ${dakika} dakika önce`;
+    }
+});
+    </script>
+</body>
+</html>
